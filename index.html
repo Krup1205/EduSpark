@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduSpark - Faculty Feedback System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  </head>
+  <body>
+    <!-- Login Page -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo-container">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h2 class="app-name">EduSpark</h2>
+                    <p class="app-tagline">Faculty Feedback System</p>
+                </div>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" required placeholder="Enter your email">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" required placeholder="Enter your password">
+                        </div>
+                    </div>
+                    
+                    <div id="loginError" class="error-message hidden"></div>
+                    
+                    <button type="submit" id="loginButton" class="login-button">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </button>
+                </form>
+                
+                <div class="demo-info">
+                    <h4 class="demo-heading">Pre-seeded Users:</h4>
+                    <div class="demo-credentials">
+                        <div class="credential-item">
+                            <span class="credential-icon">👨‍💻</span>
+                            <span class="credential-text"><strong>Admin:</strong> admin@piet.edu / Admin@123</span>
+                        </div>
+                        <div class="credential-item">
+                            <span class="credential-icon">👩‍🏫</span>
+                            <span class="credential-text"><strong>Faculty:</strong> faculty1@piet.edu / Faculty@123</span>
+                        </div>
+                        <div class="credential-item">
+                            <span class="credential-icon">🎓</span>
+                            <span class="credential-text"><strong>Student:</strong> student1@piet.edu / Student@123</span>
+                        </div>
+                        <p class="italic">Check console for more users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="page">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <div class="nav-brand">EduSpark</div>
+                    <div class="nav-menu">
+                        <button class="nav-item active" data-view="home">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </button>
+                        <button class="nav-item" data-view="submit-feedback">
+                            <i class="fas fa-comment"></i>
+                            <span>Submit Feedback</span>
+                        </button>
+                        <button class="nav-item" data-view="my-feedback">
+                            <i class="fas fa-file-alt"></i>
+                            <span>My Feedback</span>
+                        </button>
+                        <button class="nav-item" data-view="profile">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <span class="welcome-text">Welcome, <span id="studentName"></span></span>
+                    <button class="logout-button" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="mobile-nav">
+            <button class="mobile-nav-item active" data-view="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="mobile-nav-item" data-view="submit-feedback">
+                <i class="fas fa-comment"></i>
+                <span>Submit</span>
+            </button>
+            <button class="mobile-nav-item" data-view="my-feedback">
+                <i class="fas fa-file-alt"></i>
+                <span>Feedback</span>
+            </button>
+            <button class="mobile-nav-item" data-view="profile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </div>
+        
+        <main class="main-content">
+            <!-- Student Home View -->
+            <div id="home" class="view active">
+                <div class="welcome-header">
+                    <h1>Welcome, <span id="studentWelcomeName"></span>!</h1>
+                    <div class="user-info">
+                        <div class="info-item">
+                            <i class="fas fa-building"></i>
+                            <span id="studentInstitute"></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-book-open"></i>
+                            <span id="studentDepartment"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Feedback Submitted</p>
+                                <p class="stat-value" id="feedbackCount">0</p>
+                            </div>
+                            <div class="stat-icon blue">
+                                <i class="fas fa-comment"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Faculties Rated</p>
+                                <p class="stat-value" id="facultiesRatedCount">0</p>
+                            </div>
+                            <div class="stat-icon teal">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Avg Rating Given</p>
+                                <p class="stat-value" id="avgRatingGiven">0</p>
+                            </div>
+                            <div class="stat-icon green">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-activities">
+                    <div class="activities-header">
+                        <h3>Recent Activity</h3>
+                        <span class="activity-count" id="activityCount">0</span>
+                    </div>
+                    <div id="recentActivities">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit Feedback View -->
+            <div id="submit-feedback" class="view">
+                <div class="page-header">
+                    <h2>Submit Feedback</h2>
+                    <p>Provide feedback for your faculty members</p>
+                </div>
+                
+                <div class="feedback-form-container">
+                    <form id="feedbackForm" class="feedback-form">
+                        <div class="form-group">
+                            <label for="facultySelect">Select Faculty</label>
+                            <select id="facultySelect" required>
+                                <option value="">Choose a faculty member</option>
+                            </select>
+                            <div id="facultyError" class="error-message hidden"></div>
+                        </div>
+                        
+                        <div class="ratings-section">
+                            <h3>Rate the following aspects:</h3>
+                            
+                            <div class="rating-item">
+                                <label for="teachingEffectiveness">Teaching Effectiveness</label>
+                                <div class="star-rating" data-rating="0" data-field="teachingEffectiveness">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="communication">Communication</label>
+                                <div class="star-rating" data-rating="0" data-field="communication">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="subjectKnowledge">Subject Knowledge</label>
+                                <div class="star-rating" data-rating="0" data-field="subjectKnowledge">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="engagement">Engagement</label>
+                                <div class="star-rating" data-rating="0" data-field="engagement">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="clarityOfConcepts">Clarity of Concepts</label>
+                                <div class="star-rating" data-rating="0" data-field="clarityOfConcepts">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="punctuality">Punctuality</label>
+                                <div class="star-rating" data-rating="0" data-field="punctuality">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="useOfTechnology">Use of Technology</label>
+                                <div class="star-rating" data-rating="0" data-field="useOfTechnology">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="approachability">Approachability</label>
+                                <div class="star-rating" data-rating="0" data-field="approachability">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="understandingStudents">Understanding Students</label>
+                                <div class="star-rating" data-rating="0" data-field="understandingStudents">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-item">
+                                <label for="overallExperience">Overall Experience</label>
+                                <div class="star-rating" data-rating="0" data-field="overallExperience">
+                                    <span class="star" data-value="1" title="1 - Poor">★</span>
+                                    <span class="star" data-value="2" title="2 - Fair">★</span>
+                                    <span class="star" data-value="3" title="3 - Good">★</span>
+                                    <span class="star" data-value="4" title="4 - Very Good">★</span>
+                                    <span class="star" data-value="5" title="5 - Excellent">★</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="comments">Additional Comments</label>
+                            <textarea id="comments" rows="4" placeholder="Share your thoughts and suggestions..." maxlength="250"></textarea>
+                            <div class="char-counter">
+                                <span id="charCount">0</span>/250 characters
+                            </div>
+                        </div>
+                        
+                        <div id="feedbackError" class="error-message hidden"></div>
+                        <div id="feedbackSuccess" class="success-message hidden"></div>
+                        
+                        <button type="submit" id="submitFeedbackBtn" class="submit-button">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Submit Feedback</span>
+                        </button>
+                    </form>
+                    
+
+                </div>
+            </div>
+            
+            <!-- My Feedback View -->
+            <div id="my-feedback" class="view">
+                <div class="page-header">
+                    <h2>My Feedback</h2>
+                    <p>View all your submitted feedback</p>
+                </div>
+                
+                <!-- Search and Filter Section -->
+                <div class="feedback-controls">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="feedbackSearch" placeholder="Search by faculty name..." class="search-input">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-container">
+                        <select id="sortFilter" class="filter-select">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="highest">Highest Rating</option>
+                            <option value="lowest">Lowest Rating</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Feedback List -->
+                <div id="feedbackList" class="feedback-list">
+                    <!-- Feedback items will be populated by JavaScript -->
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-icon">😊</div>
+                    <h3>No feedback submitted yet</h3>
+                    <p>Start by submitting feedback for your faculty members</p>
+                    <button class="empty-state-button" onclick="showView('submit-feedback')">
+                        <i class="fas fa-plus"></i>
+                        Submit Feedback
+                    </button>
+                </div>
+                
+                <!-- Skeleton Loader -->
+                <div id="skeletonLoader" class="skeleton-loader">
+                    <!-- Skeleton cards will be generated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Profile View -->
+            <div id="profile" class="view">
+                <div class="page-header">
+                    <h2>My Profile</h2>
+                    <p>Manage your account information</p>
+                </div>
+                
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profileName"></h3>
+                            <p id="profileEmail"></p>
+                        </div>
+                    </div>
+                    
+                    <form id="profileForm" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileNameInput">Full Name</label>
+                                <input type="text" id="profileNameInput" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileEmailInput">Email</label>
+                                <input type="email" id="profileEmailInput" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileInstitute">Institute</label>
+                                <input type="text" id="profileInstitute" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileDepartment">Department</label>
+                                <input type="text" id="profileDepartment" required>
+                            </div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="submit" class="save-button">
+                                <i class="fas fa-save"></i>
+                                <span>Save Changes</span>
+                            </button>
+                            <button type="button" class="change-password-button" onclick="changePassword()">
+                                <i class="fas fa-key"></i>
+                                <span>Change Password</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Faculty Dashboard -->
+    <div id="facultyDashboard" class="page">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <div class="nav-brand">EduSpark</div>
+                    <div class="nav-menu">
+                        <button class="nav-item active" data-view="home">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </button>
+                        <button class="nav-item" data-view="my-feedback">
+                            <i class="fas fa-comment"></i>
+                            <span>My Feedback</span>
+                        </button>
+                        <button class="nav-item" data-view="analytics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analytics</span>
+                        </button>
+                        <button class="nav-item" data-view="profile">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <span class="welcome-text">Welcome, <span id="facultyName"></span></span>
+                    <button class="logout-button" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="mobile-nav">
+            <button class="mobile-nav-item active" data-view="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="mobile-nav-item" data-view="my-feedback">
+                <i class="fas fa-comment"></i>
+                <span>Feedback</span>
+            </button>
+            <button class="mobile-nav-item" data-view="analytics">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+            </button>
+            <button class="mobile-nav-item" data-view="profile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </div>
+        
+        <main class="main-content">
+            <!-- Faculty Home View -->
+            <div id="home" class="view active">
+                <div class="welcome-header">
+                    <h1>Welcome, <span id="facultyWelcomeName"></span>!</h1>
+                    <div class="user-info">
+                        <div class="info-item">
+                            <i class="fas fa-building"></i>
+                            <span id="facultyInstitute"></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-book-open"></i>
+                            <span id="facultyDepartment"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Total Feedback</p>
+                                <p class="stat-value" id="facultyTotalFeedback">45</p>
+                            </div>
+                            <div class="stat-icon blue">
+                                <i class="fas fa-comment"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Average Rating</p>
+                                <p class="stat-value" id="facultyAvgRating">4.3</p>
+                            </div>
+                            <div class="stat-icon teal">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Last Feedback</p>
+                                <p class="stat-value" id="facultyLastFeedback">2 days ago</p>
+                            </div>
+                            <div class="stat-icon green">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-feedback-card">
+                    <div class="card-header">
+                        <h3>Recent Feedback</h3>
+                    </div>
+                    <div id="facultyRecentFeedback" class="card-content">
+                        <!-- Recent feedback will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+                         <!-- Faculty My Feedback View -->
+             <div id="my-feedback" class="view">
+                 <div class="page-header">
+                     <h2>My Feedback</h2>
+                     <p>View anonymous feedback received from students</p>
+                 </div>
+                 
+                 <div class="feedback-container">
+                     <div class="feedback-filters">
+                         <div class="filter-group">
+                             <label for="facultyMonthFilter">Month:</label>
+                             <select id="facultyMonthFilter" class="filter-select">
+                                 <option value="">All Months</option>
+                                 <option value="1">January</option>
+                                 <option value="2">February</option>
+                                 <option value="3">March</option>
+                                 <option value="4">April</option>
+                                 <option value="5">May</option>
+                                 <option value="6">June</option>
+                                 <option value="7">July</option>
+                                 <option value="8">August</option>
+                                 <option value="9">September</option>
+                                 <option value="10">October</option>
+                                 <option value="11">November</option>
+                                 <option value="12">December</option>
+                             </select>
+                         </div>
+                         
+
+                         
+                         <div class="filter-group">
+                             <label for="facultySortFilter">Sort By:</label>
+                             <select id="facultySortFilter" class="filter-select">
+                                 <option value="newest">Newest First</option>
+                                 <option value="oldest">Oldest First</option>
+                                 <option value="highest">Highest Rating</option>
+                                 <option value="lowest">Lowest Rating</option>
+                             </select>
+                         </div>
+                         
+                         <button class="clear-filters-btn" onclick="clearFacultyFeedbackFilters()">
+                             <i class="fas fa-times"></i>
+                             Clear Filters
+                         </button>
+                     </div>
+                     
+                     <div id="facultyFeedbackList" class="feedback-list">
+                         <!-- Anonymous feedback items will be populated here -->
+                     </div>
+                 </div>
+             </div>
+            
+            <!-- Analytics View -->
+            <div id="analytics" class="view">
+                <div class="page-header">
+                    <h2>Analytics</h2>
+                    <p>Performance insights and trends</p>
+                </div>
+                
+                <!-- Date Range Filter -->
+                <div class="analytics-filters">
+                    <div class="filter-group">
+                        <label for="dateRangeFilter">Time Period:</label>
+                        <select id="dateRangeFilter" class="filter-select">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 3 Months</option>
+                            <option value="all" selected>All Time</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="analytics-overview">
+                    <div class="overview-card performance-card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Overall Performance</h3>
+                        </div>
+                        <div class="overall-rating">
+                            <span class="rating-number" id="overallRating">0.0</span>
+                            <span class="rating-scale">/5</span>
+                            <div class="rating-stars" id="overallRatingStars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="performance-indicator" id="performanceIndicator">
+                            <span class="indicator-text">Excellent</span>
+                        </div>
+                        <div class="progress-ring">
+                            <svg class="progress-ring-svg" width="80" height="80">
+                                <circle class="progress-ring-circle-bg" cx="40" cy="40" r="32" stroke-width="6"></circle>
+                                <circle class="progress-ring-circle" cx="40" cy="40" r="32" stroke-width="6" stroke-dasharray="0 201"></circle>
+                            </svg>
+                            <div class="progress-ring-text">
+                                <span id="progressRingPercentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overview-card strongest-card">
+                        <div class="card-header">
+                            <i class="fas fa-arrow-up"></i>
+                            <h3>Strongest Field</h3>
+                        </div>
+                        <div class="field-info">
+                            <p class="field-name" id="strongestFieldName">-</p>
+                            <p class="field-rating" id="strongestFieldRating">-</p>
+                        </div>
+                        <div class="field-badge strong">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="overview-card weakest-card">
+                        <div class="card-header">
+                            <i class="fas fa-arrow-down"></i>
+                            <h3>Weakest Field</h3>
+                        </div>
+                        <div class="field-info">
+                            <p class="field-name" id="weakestFieldName">-</p>
+                            <p class="field-rating" id="weakestFieldRating">-</p>
+                        </div>
+                        <div class="field-badge weak">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Parameter Ratings Breakdown</h3>
+                        <p>Average ratings across all feedback parameters</p>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="facultyChart"></canvas>
+                    </div>
+                </div>
+                
+
+            </div>
+            
+            <!-- Faculty Profile View -->
+            <div id="profile" class="view">
+                <div class="page-header">
+                    <h2>My Profile</h2>
+                    <p>Manage your account information</p>
+                </div>
+                
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="facultyProfileName"></h3>
+                            <p id="facultyProfileEmail"></p>
+                        </div>
+                    </div>
+                    
+                    <form id="facultyProfileForm" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="facultyProfileNameInput">Full Name</label>
+                                <input type="text" id="facultyProfileNameInput" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="facultyProfileEmailInput">Email</label>
+                                <input type="email" id="facultyProfileEmailInput" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="facultyProfileInstitute">Institute</label>
+                                <input type="text" id="facultyProfileInstitute" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="facultyProfileDepartment">Department</label>
+                                <input type="text" id="facultyProfileDepartment" required>
+                            </div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="submit" class="save-button">
+                                <i class="fas fa-save"></i>
+                                <span>Save Changes</span>
+                            </button>
+                            <button type="button" class="change-password-button" onclick="changeFacultyPassword()">
+                                <i class="fas fa-key"></i>
+                                <span>Change Password</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="page">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <div class="nav-brand">EduSpark Admin</div>
+                    <div class="nav-menu">
+                        <button class="nav-item active" data-view="dashboard">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </button>
+                        <button class="nav-item" data-view="manage-faculties">
+                            <i class="fas fa-users"></i>
+                            <span>Manage Faculties</span>
+                        </button>
+                        <button class="nav-item" data-view="manage-students">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Manage Students</span>
+                        </button>
+                        <button class="nav-item" data-view="analytics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analytics</span>
+                        </button>
+                        <button class="nav-item" data-view="profile">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <span class="welcome-text">Welcome, <span id="adminName"></span></span>
+                    <button class="logout-button" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="mobile-nav">
+            <button class="mobile-nav-item active" data-view="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </button>
+            <button class="mobile-nav-item" data-view="manage-faculties">
+                <i class="fas fa-users"></i>
+                <span>Faculties</span>
+            </button>
+            <button class="mobile-nav-item" data-view="manage-students">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Students</span>
+            </button>
+            <button class="mobile-nav-item" data-view="analytics">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+            </button>
+            <button class="mobile-nav-item" data-view="profile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </div>
+        
+        <main class="main-content">
+            <!-- Admin Dashboard View -->
+            <div id="dashboard" class="view active">
+                <div class="welcome-header">
+                    <h1>Admin Dashboard</h1>
+                    <p>Welcome, <span id="adminWelcomeName"></span>! Manage the faculty feedback system</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Total Students</p>
+                                <p class="stat-value" id="adminTotalStudents">2</p>
+                            </div>
+                            <div class="stat-icon blue">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Total Faculty</p>
+                                <p class="stat-value" id="adminTotalFaculty">3</p>
+                            </div>
+                            <div class="stat-icon teal">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div>
+                                <p class="stat-label">Total Feedback</p>
+                                <p class="stat-value" id="adminTotalFeedback">2</p>
+                            </div>
+                            <div class="stat-icon green">
+                                <i class="fas fa-comment"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Performing Faculties -->
+                <div class="overview-card top-performing">
+                    <div class="section-header" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-trophy" style="color:#f59e0b;"></i>
+                        <h3 style="margin:0;">Top Performing Faculties</h3>
+                    </div>
+                    
+                    <!-- Top Faculties Filters -->
+                    <div class="top-faculties-filters" style="margin-bottom: 1rem;">
+                        <div class="filter-controls">
+                            <div class="filter-group">
+                                <label for="topFacultiesInstituteFilter">Institute</label>
+                                <select id="topFacultiesInstituteFilter" class="filter-select modern-select">
+                                    <option value="">All Institutes</option>
+                                    <option value="PIET">PIET - Parul Institute of Engineering & Technology</option>
+                                    <option value="PIT">PIT - Parul Institute of Technology</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="topFacultiesDepartmentFilter">Department</label>
+                                <select id="topFacultiesDepartmentFilter" class="filter-select modern-select">
+                                    <option value="">All Departments</option>
+                                    <option value="CSE">CSE</option>
+                                    <option value="IT">IT</option>
+                                    <option value="CS">CS</option>
+                                </select>
+                            </div>
+                            <button class="clear-filters-button modern-clear-btn" onclick="clearTopFacultiesFilters()">
+                                <i class="fas fa-times"></i>
+                                <span>Clear Filters</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Institute</th>
+                                    <th>Rating</th>
+                                    <th>Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topFacultiesTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics View -->
+            <div id="analytics" class="view">
+                <div class="page-header modern-header">
+                    <div class="header-content">
+                        <div class="header-text">
+                            <h1>Analytics Dashboard 📊</h1>
+                            <p>Comprehensive insights and performance metrics</p>
+                        </div>
+                        <div class="real-time-indicator">
+                            <div class="live-dot"></div>
+                            <span>Live Updates</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="view-content">
+                    <!-- Filters Section -->
+                    <div class="analytics-filters">
+                        <div class="filter-group">
+                            <label for="instituteFilter">Institute:</label>
+                            <select id="instituteFilter" class="filter-select">
+                                <option value="All">All Institutes</option>
+                                <option value="PIET">PIET - Parul Institute of Engineering & Technology</option>
+                                <option value="PIT">PIT - Parul Institute of Technology</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="departmentFilter">Department:</label>
+                            <select id="departmentFilter" class="filter-select">
+                                <option value="All">All Departments</option>
+                                <option value="IT">IT</option>
+                                <option value="CSE">CSE</option>
+                                <option value="CS">CS</option>
+                            </select>
+                        </div>
+                        
+                        <button id="applyFilters" class="apply-filters-btn">
+                            <i class="fas fa-filter"></i>
+                            Apply Filters
+                        </button>
+                        
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="analyticsLoading" class="analytics-loading hidden">
+                        <div class="loading-spinner"></div>
+                        <p>Loading analytics data...</p>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div id="analyticsError" class="analytics-error hidden">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p id="errorMessage">An error occurred while loading analytics data.</p>
+                        <button onclick="loadAnalytics()" class="retry-btn">Retry</button>
+                    </div>
+                    
+                    <!-- Charts Section -->
+                    <div class="charts-container">
+                        <!-- Parameter Analysis Chart -->
+                        <div class="chart-card">
+                            <h3>Parameter Analysis</h3>
+                            <p class="chart-subtitle">Average ratings for each parameter</p>
+                            <div class="chart-container">
+                                <canvas id="parameterChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Trend Analysis Chart -->
+                        <div class="chart-card">
+                            <h3>Trend Analysis</h3>
+                            <p class="chart-subtitle">Rating trends over time</p>
+                            <div class="chart-container">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Department Comparison Chart -->
+                        <div class="chart-card full-width">
+                            <h3>Department Comparison</h3>
+                            <p class="chart-subtitle">Average ratings by department</p>
+                            <div class="chart-container">
+                                <canvas id="departmentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+            
+            <!-- Manage Faculties View -->
+            <div id="manage-faculties" class="view">
+                <div class="page-header modern-header">
+                    <div class="header-content">
+                        <div class="header-text">
+                            <h1>Manage Faculties 👩‍🏫</h1>
+                            <p>Add, view, and manage faculty members efficiently</p>
+                        </div>
+                        <button onclick="showAddFacultyForm()" class="btn-primary modern-add-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Add New Faculty</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="view-content">
+
+                    
+                    <!-- Search and Filters Section -->
+                    <div class="search-filters-section">
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="facultySearchInput" class="search-input" placeholder="Search faculties by name or email...">
+                            </div>
+                        </div>
+                        
+                        <div class="filters-container">
+                            <div class="filter-controls">
+                                <div class="filter-group">
+                                    <label for="facultyInstituteFilter">Institute</label>
+                                    <select id="facultyInstituteFilter" class="filter-select modern-select">
+                                        <option value="">All Institutes</option>
+                                        <option value="PIET">PIET - Parul Institute of Engineering & Technology</option>
+                                        <option value="PIT">PIT - Parul Institute of Technology</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="facultyDepartmentFilter">Department</label>
+                                    <select id="facultyDepartmentFilter" class="filter-select modern-select">
+                                        <option value="">All Departments</option>
+                                        <option value="CSE">CSE</option>
+                                        <option value="IT">IT</option>
+                                    </select>
+                                </div>
+                                <button class="clear-filters-button modern-clear-btn" onclick="clearFacultyFilters()">
+                                    <i class="fas fa-times"></i>
+                                    <span>Clear Filters</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Faculty List -->
+                    <div class="table-container modern-table">
+                        <div class="table-header">
+                            <div class="table-title">
+                                <h3>Faculty List</h3>
+                                <span id="facultyCount" class="count-badge modern-badge">0 faculties found</span>
+                            </div>
+                        </div>
+                        
+                        <div class="table-wrapper">
+                            <table class="data-table modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Institute</th>
+                                        <th>Department</th>
+                                        <th>Subject</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="facultyTableBody">
+                                    <!-- Faculty rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="pagination-container">
+                            <div class="pagination-info">
+                                <span>Showing 1-10 of <span id="facultyTotalCount">0</span> faculties</span>
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="pagination-btn" id="facultyPrevPage" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="pagination-current">Page 1</span>
+                                <button class="pagination-btn" id="facultyNextPage">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manage Students View -->
+            <div id="manage-students" class="view">
+                <div class="page-header modern-header">
+                    <div class="header-content">
+                        <div class="header-text">
+                            <h1>Manage Students 🎓</h1>
+                            <p>Add, view, and manage student members efficiently</p>
+                        </div>
+                        <button onclick="showAddStudentForm()" class="btn-primary modern-add-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Add New Student</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="view-content">
+                    <!-- Search and Filters Section -->
+                    <div class="search-filters-section">
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="studentSearchInput" class="search-input" placeholder="Search students by name or email...">
+                            </div>
+                        </div>
+                        
+                        <div class="filters-container">
+                            <div class="filter-controls">
+                                <div class="filter-group">
+                                    <label for="studentInstituteFilter">Institute</label>
+                                    <select id="studentInstituteFilter" class="filter-select modern-select">
+                                        <option value="">All Institutes</option>
+                                        <option value="PIET">PIET - Parul Institute of Engineering & Technology</option>
+                                        <option value="PIT">PIT - Parul Institute of Technology</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="studentDepartmentFilter">Department</label>
+                                    <select id="studentDepartmentFilter" class="filter-select modern-select">
+                                        <option value="">All Departments</option>
+                                        <option value="CSE">CSE</option>
+                                        <option value="IT">IT</option>
+                                    </select>
+                                </div>
+                                <button class="clear-filters-button modern-clear-btn" onclick="clearStudentFilters()">
+                                    <i class="fas fa-times"></i>
+                                    <span>Clear Filters</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Student List -->
+                    <div class="table-container modern-table">
+                        <div class="table-header">
+                            <div class="table-title">
+                                <h3>Student List</h3>
+                                <span id="studentCount" class="count-badge modern-badge">0 students found</span>
+                            </div>
+                        </div>
+                        
+                        <div class="table-wrapper">
+                            <table class="data-table modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Institute</th>
+                                        <th>Department</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentTableBody">
+                                    <!-- Student rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="pagination-container">
+                            <div class="pagination-info">
+                                <span>Showing 1-10 of <span id="studentTotalCount">0</span> students</span>
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="pagination-btn" id="studentPrevPage" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="pagination-current">Page 1</span>
+                                <button class="pagination-btn" id="studentNextPage">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Analytics View -->
+            <div id="analytics" class="view">
+                <div class="page-header">
+                    <h2>System Analytics</h2>
+                    <p>Overall system performance and insights</p>
+                </div>
+                
+                <!-- Filters -->
+                <div class="feedback-filters" id="adminAnalyticsFilters">
+                    <select id="analyticsInstituteFilter" class="filter-select">
+                        <option value="">All Institutes</option>
+                        <option value="PIET">PIET - Parul Institute of Engineering & Technology</option>
+                        <option value="PIT">PIT - Parul Institute of Technology</option>
+                    </select>
+                    <select id="analyticsDepartmentFilter" class="filter-select">
+                        <option value="">All Departments</option>
+                        <option value="CSE">CSE</option>
+                        <option value="IT">IT</option>
+                        <option value="Mechanical">Mechanical</option>
+                    </select>
+                </div>
+                
+                <!-- Charts -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Feedback Trends</h3>
+                        <canvas id="adminTrendChart" height="220"></canvas>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>Department Comparison</h3>
+                        <canvas id="adminDeptBarChart" height="220"></canvas>
+                    </div>
+                </div>
+
+                <!-- Faculty Performance Table -->
+                <div class="data-table" id="adminFacultyPerformance">
+                    <div class="table-header">
+                        <h3>Faculty Performance</h3>
+                        <div style="margin-top:0.5rem; display:flex; gap:0.5rem; align-items:center;">
+                            <label for="adminFacultyDeptFilter" style="font-size:0.875rem; color:#374151;">Department:</label>
+                            <select id="adminFacultyDeptFilter" class="filter-select" style="min-width: 160px;">
+                                <option value="">All Departments</option>
+                                <option value="CSE">CSE</option>
+                                <option value="IT">IT</option>
+                                <option value="Mechanical">Mechanical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row" style="font-weight:600;">
+                            <div class="table-cell">Faculty Name</div>
+                            <div class="table-cell">Department</div>
+                            <div class="table-cell">Average Rating <button id="sortByRating" class="action-button edit-button" title="Sort by rating"><i class="fas fa-sort"></i></button></div>
+                            <div class="table-cell">Total Feedbacks <button id="sortByFeedbacks" class="action-button edit-button" title="Sort by feedbacks"><i class="fas fa-sort"></i></button></div>
+                        </div>
+                        <div id="adminFacultyTableBody"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Profile View -->
+            <div id="profile" class="view">
+                <div class="page-header">
+                    <h2>My Profile</h2>
+                    <p>Manage your admin account information</p>
+                </div>
+                
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="adminProfileName"></h3>
+                            <p id="adminProfileEmail"></p>
+                        </div>
+                    </div>
+                    
+                    <form id="adminProfileForm" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="adminProfileNameInput">Full Name</label>
+                                <input type="text" id="adminProfileNameInput" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adminProfileEmailInput">Email</label>
+                                <input type="email" id="adminProfileEmailInput" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="adminProfileInstitute">Institute</label>
+                                <input type="text" id="adminProfileInstitute" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adminProfileDepartment">Department</label>
+                                <input type="text" id="adminProfileDepartment" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="save-button">
+                            <i class="fas fa-save"></i>
+                            <span>Save Changes</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    </div>
+    
+    <!-- Password Change Modal -->
+    <div id="passwordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button type="button" class="close-button" onclick="closePasswordModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="passwordChangeForm" class="password-form">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="currentPassword" required placeholder="Enter current password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="newPassword" required placeholder="Enter new password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="confirmPassword" required placeholder="Confirm new password">
+                    </div>
+                </div>
+                <div id="passwordError" class="error-message hidden"></div>
+                <div class="button-group">
+                    <button type="submit" class="save-button">
+                        <i class="fas fa-key"></i>
+                        <span>Change Password</span>
+                    </button>
+                    <button type="button" class="cancel-button" onclick="closePasswordModal()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Faculty Modal -->
+    <div id="facultyModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-chalkboard-teacher"></i> Add New Faculty</h3>
+                <button type="button" class="close-button" onclick="hideAddFacultyForm()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="facultyForm" class="modal-form">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-user"></i> Personal Information
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="facultyFormName" class="form-label required">Full Name</label>
+                            <input type="text" id="facultyFormName" class="form-input" required placeholder="Enter faculty's full name">
+                            <div class="help-text required">Required field</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="facultyEmail" class="form-label required">Email Address</label>
+                            <input type="email" id="facultyEmail" class="form-input" required placeholder="Enter faculty's email">
+                            <div class="help-text required">Required field</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="facultyPassword" class="form-label required">Password</label>
+                            <input type="password" id="facultyPassword" class="form-input" required placeholder="Enter password (min. 6 characters)">
+                            <div class="help-text required">Minimum 6 characters required</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="facultySubject" class="form-label">Subject</label>
+                            <input type="text" id="facultySubject" class="form-input" placeholder="Enter subject (optional)">
+                            <div class="help-text">Optional field</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Institutional Information Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-university"></i> Institutional Information
+                    </div>
+                    <div class="form-group">
+                        <label for="facultyFormInstitute" class="form-label required">Institute</label>
+                        <select id="facultyFormInstitute" class="form-select" required>
+                            <option value="">Select Institute</option>
+                            <option value="PIET">PIET - Parul Institute of Engineering & Technology</option>
+                            <option value="PIT">PIT - Parul Institute of Technology</option>
+                        </select>
+                        <div class="help-text required">Required field</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="facultyFormDepartment" class="form-label required">Department</label>
+                        <select id="facultyFormDepartment" class="form-select" required>
+                            <option value="">Select Department</option>
+                            <option value="CSE">CSE - Computer Science & Engineering</option>
+                            <option value="IT">IT - Information Technology</option>
+                        </select>
+                        <div class="help-text required">Required field</div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="save-button">
+                        <i class="fas fa-save"></i>
+                        <span>Save Faculty</span>
+                    </button>
+                    <button type="button" class="cancel-button" onclick="hideAddFacultyForm()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-graduate"></i> Add New Student</h3>
+                <button type="button" class="close-button" onclick="hideAddStudentForm()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="studentForm" class="modal-form">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-user"></i> Personal Information
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentFormName" class="form-label required">Full Name</label>
+                            <input type="text" id="studentFormName" class="form-input" required placeholder="Enter student's full name">
+                            <div class="help-text required">Required field</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentEmail" class="form-label required">Email Address</label>
+                            <input type="email" id="studentEmail" class="form-input" required placeholder="Enter student's email">
+                            <div class="help-text required">Required field</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentPassword" class="form-label required">Password</label>
+                            <input type="password" id="studentPassword" class="form-input" required placeholder="Enter password (min. 6 characters)">
+                            <div class="help-text required">Minimum 6 characters required</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentEnrollment" class="form-label">Enrollment Number</label>
+                            <input type="text" id="studentEnrollment" class="form-input" placeholder="Enter enrollment number (optional)">
+                            <div class="help-text">Optional field</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Institutional Information Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-university"></i> Institutional Information
+                    </div>
+                    <div class="form-group">
+                        <label for="studentFormInstitute" class="form-label required">Institute</label>
+                        <select id="studentFormInstitute" class="form-select" required>
+                            <option value="">Select Institute</option>
+                            <option value="PIET">PIET - Parul Institute of Engineering & Technology</option>
+                            <option value="PIT">PIT - Parul Institute of Technology</option>
+                        </select>
+                        <div class="help-text required">Required field</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentFormDepartment" class="form-label required">Department</label>
+                        <select id="studentFormDepartment" class="form-select" required>
+                            <option value="">Select Department</option>
+                            <option value="CSE">CSE - Computer Science & Engineering</option>
+                            <option value="IT">IT - Information Technology</option>
+                        </select>
+                        <div class="help-text required">Required field</div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="save-button">
+                        <i class="fas fa-save"></i>
+                        <span>Save Student</span>
+                    </button>
+                    <button type="button" class="cancel-button" onclick="hideAddStudentForm()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal hidden">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h3 id="confirmationTitle">Confirm Deletion</h3>
+                <button type="button" class="close-button" onclick="closeConfirmationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage">Are you sure you want to delete this item? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeConfirmationModal()">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+                <button type="button" class="btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="app.js"></script>
+    <script src="seed-database.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
