@@ -4452,6 +4452,45 @@ body {
     color: #7f1d1d;
 }
 
+/* Enhanced layout for confirmation modal */
+.modal-content.confirmation-modal {
+    max-width: 520px;
+    border-radius: 12px;
+}
+
+.confirmation-modal .modal-header,
+.confirmation-modal .modal-body,
+.confirmation-modal .modal-footer {
+    padding: 1rem 1.25rem;
+}
+
+.confirmation-modal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.confirmation-modal .modal-body {
+    display: block;
+}
+
+.confirmation-modal .modal-body p {
+    margin: 0.25rem 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.confirmation-modal .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* Better spacing inside danger button when showing spinner + text */
+.btn-danger .fas.fa-spinner {
+    margin-right: 0.5rem;
+}
+
 /* Button Styles */
 .btn-secondary {
     background: white;
